@@ -198,19 +198,15 @@ class AccountFragment : FragmentWithAnim(R.layout.fragment_account), View.OnClic
 
                 if (fromUser) { //需要判断是否为用户手动点击的，否则会一直进入微软登录界面
                     when (toIndex) {
+                        //离线账户
+                        0 -> localLogin()
                         //微软账户
-                        0 -> ZHTools.swapFragmentWithAnim(
+                        1 -> ZHTools.swapFragmentWithAnim(
                             this@AccountFragment,
                             MicrosoftLoginFragment::class.java,
                             MicrosoftLoginFragment.TAG,
                             null
                         )
-                        //离线账户
-                        1 -> {
-                            nonMicrosoftLogin(
-                                R.string.account_no_microsoft_account_local
-                            ) { localLogin() }
-                        }
                         //外置账户
                         else -> {
                             nonMicrosoftLogin(
@@ -244,6 +240,8 @@ class AccountFragment : FragmentWithAnim(R.layout.fragment_account), View.OnClic
         }.ended(TaskExecutors.getAndroidUI()) {
             reloadRecyclerView()
             mAccountViewWrapper.refreshAccountInfo()
+            //离线优先：没有任何账号时，直接打开离线账号的创建表单
+            if (mAccountsData.isEmpty()) localLogin()
         }.execute()
     }
 
